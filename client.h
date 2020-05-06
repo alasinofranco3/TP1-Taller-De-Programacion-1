@@ -20,6 +20,9 @@ int dbus_client_get_call(dbus_client_t *self, resizable_buffer_t *b, char* r);
 
 /*intenta conectar al cliente al host h en el puerto p*/
 int dbus_client_connect(dbus_client_t *self, const char* h, const char* p);
+
+/*Construye el dbus_message a enviar al servidor a partir del buffer
+recibido por parametro,lo envia y espera a recibir el OK del servidor*/
 int dbus_client_send(dbus_client_t *self, resizable_buffer_t *buffer);
 
 

@@ -58,14 +58,12 @@ int dbus_client_send(dbus_client_t *self, resizable_buffer_t *buffer) {
 	}else{
 		resizable_buffer_destroy(buffer);
 	}
-
 	return 0;
 }
 
 int dbus_client_get_call(dbus_client_t *self, resizable_buffer_t * b, char * r){
 	int status;
-	parser_t parser;
-	
+	parser_t parser;	
 	if (resizable_buffer_create(b, 1)) {
 		dbus_client_destroy(self);
 		return ERROR;
@@ -75,17 +73,13 @@ int dbus_client_get_call(dbus_client_t *self, resizable_buffer_t * b, char * r){
 	 	dbus_client_destroy(self);
 	 	return ERROR;
 	}
-	
 	parser_create(&parser);
-	
 	status = parser_run(self->file, b, r);
-	
 	if (status == ERROR) {
 		parser_destroy(&parser);
 		dbus_client_destroy(self);
 		return ERROR;
 	}
 	parser_destroy(&parser);
-
 	return 0;
 }

@@ -5,13 +5,28 @@
 #include <unistd.h>
 #include "common_socket.h"
 
+//FUNCIONES PRIVADAS
+int error_in_getaddrinfo(int status, socket_t *skt) {
+	if (status != 0) { 
+  		printf("Error in getaddrinfo: %s\n", gai_strerror(status));
+      	socket_destroy(skt);
+      	return ERROR;
+   	}
+   	return 0;
+}
 
+void set_TCP_options(struct addrinfo *hints) {
+	memset(hints, 0, sizeof(struct addrinfo));
+	hints->ai_family = AF_INET;
+	hints->ai_socktype = SOCK_STREAM;
+	hints->ai_flags = 0;
+}
+
+
+//FUNCIONES PUBLICAS
 int socket_create(socket_t *self) {
 	struct addrinfo hints;
-	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = 0;	
+	set_TCP_options(&hints);
 	
 	self->skt = socket(hints.ai_family, hints.ai_socktype, hints.ai_protocol);
 
@@ -27,26 +42,20 @@ void socket_destroy(socket_t *self) {
 	close(self->skt);
 }
 
+
 int socket_bind_and_listen(socket_t *self, const char* port, int size) {
 	int status;
 	struct addrinfo *results, *ptr;
 	struct addrinfo hints;
 	bool success = false;
 
-	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = 0;
-
+	set_TCP_options(&hints);
+	
 	status = getaddrinfo(NULL, port, &hints, &results);
 
-	if (status != 0) { 
-  		printf("Error in getaddrinfo: %s\n", gai_strerror(status));
-      	socket_destroy(self);
-      	return ERROR;
-   	}
+	if (error_in_getaddrinfo(status, self) == ERROR) return ERROR;
 
-	//REVISAR CAMBIAR FOR POR UN WHILE
+
 	for (ptr = results; ptr != NULL && success == false; ptr = ptr->ai_next) {
 		status = bind(self->skt, ptr->ai_addr, ptr->ai_addrlen);
 		status = listen(self->skt, size);
@@ -70,18 +79,11 @@ int socket_connect(socket_t *self, const char* h, const char* p) {
 	struct addrinfo *results, *ptr;
 	struct addrinfo hints;
 
-	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = 0;
+	set_TCP_options(&hints);
 
 	status = getaddrinfo(h, p, &hints, &results);
 
-	if (status != 0) { 
-  		printf("Error in getaddrinfo: %s\n", gai_strerror(status));
-      	socket_destroy(self);
-      	return ERROR;
-   	}
+	if (error_in_getaddrinfo(status, self) == ERROR) return ERROR;
 
 	for (ptr = results; ptr != NULL && connected == false; ptr = ptr->ai_next) {
 		// NO HACE FALTA CREAR EL SOCKET ACA PORQUE YA LO TENEMOS CREADO
@@ -141,7 +143,6 @@ int socket_send(socket_t *self, char *message, int len) {
 		result = send(self->skt, &message[sent], (len - sent), MSG_NOSIGNAL);
 		
 		if (result == 0) {  //SI RESULT VALE CERO NOS CERRARON EL SKT
-			printf("Remote socket close\n");
 			remote_skt_closed = true;
 		} else if (result == -1) {
 			printf("Error in send: %s\n", strerror(errno));
@@ -180,20 +181,5 @@ int socket_recv(socket_t *self, char *buffer, int size) {
 	if (skt_closed) return 0; 
 	return received;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

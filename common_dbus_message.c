@@ -127,6 +127,9 @@ int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 	strncpy(aux, call->buffer, call->size);
 	char *read = aux;
 	char *delim = strchr(read,' ');
+	
+	read = aux;
+	delim = strchr(read,' ');
 	*delim = '\0';
 
 	if (dbus_message_header_add(self, read, 6) == ERROR) {

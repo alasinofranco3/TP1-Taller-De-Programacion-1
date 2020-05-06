@@ -89,9 +89,9 @@ int dbus_server_recv_info(dbus_server_t *self, struct call_sum *summary) {
 
 	if (result != 0) {
 		summary->endian = buffer[0];
-		summary->body_len = *(int *)&buffer[4];
-		id = *(int *)&buffer[8];
-		summary->header_size = *(int *)&buffer[12];
+		summary->body_len = *(int *)(buffer + 4);
+		id = *(int *)(buffer + 8);
+		summary->header_size = *(int *)(buffer + 12);
 
 		if (buffer[0] != 'l') {
 			summary->body_len = bswap_32(summary->body_len);

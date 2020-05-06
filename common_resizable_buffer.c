@@ -32,7 +32,6 @@ int resizable_buffer_save(resizable_buffer_t *self, char *word){
 	void *ptr_status;
 
 	if (new_size >= self->size - 1) {
-		//printf("agrandamos el buffer\n");
 		status = resizable_buffer_resize(self, new_size + 1);
 		if (status == ERROR) return ERROR;
 	}
