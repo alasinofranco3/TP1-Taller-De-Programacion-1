@@ -163,9 +163,9 @@ int dbus_server_recv_body(dbus_server_t *self, struct call_sum *summary) {
 			}
 			char* parameter = malloc(sizeof(char) * (len + 1));
 			memset(parameter, 0, len + 1);
-			while (buffer[read + 4] == ' '){
+			/*while (buffer[read + 4] == ' '){
 				read ++;
-			}
+			}*/
 			strncpy(parameter, &buffer[read + 4], len);
 			printf("    * %s\n", parameter);
 			read += (5 + len);
