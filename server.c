@@ -120,12 +120,12 @@ int dbus_server_recv_header(dbus_server_t *self, struct call_sum *summary) {
 				break;
 
 			case 1 :
-				printf("* Path: ");
+				printf("* Ruta: ");
 				read += print_header_parameter(summary->endian, ptr);
 				break;
 
 			case 2 :
-				printf("* Interface: ");
+				printf("* Interfaz: ");
 				read += print_header_parameter(summary->endian, ptr);
 				break;
 
