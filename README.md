@@ -22,6 +22,8 @@ Una vez armado el mensaje, procedemos a enviarlo a traves del socket.El dbus_cli
 Este proceso se repite para todas las lineas del archivo del dbus_client.En caso de error se liberan los recursos utilizados y se destruyen los TDAs creados,decidi tomar -1 como codigo de error.
 
 ## Diagramas:
+![diagrama de clases](/home/franco/Descargas/diagrama_clases_tp1.png)
+* Diagrama de clases,que muestra las relaciones de los TDAs del protocolo TCP
 
 ## Aclaraciones:
 
