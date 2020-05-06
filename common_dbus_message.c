@@ -187,7 +187,6 @@ int dbus_message_body_set(dbus_message_t *self, resizable_buffer_t *call) {
 		int *ptr; 
 		delim = strchr(read, ',');
 		if (delim != NULL) *delim = '\0';
-		while (*read == ' ') read ++;
 		int buf_size = 5 + strlen(read);
 		char buf [buf_size];
 		ptr = (int*)(buf);
