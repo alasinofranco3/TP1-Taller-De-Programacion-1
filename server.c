@@ -69,8 +69,7 @@ int dbus_server_recv(dbus_server_t *self) {
 			if (status == 0) remote_skt_closed = true;
 			status = dbus_server_recv_body(self, &summary);
 			if (status == ERROR) return ERROR;
-			if (status == 0) remote_skt_closed = true;
-			
+			if (status == 0) remote_skt_closed = true;			
 			server_send(&self->server, "OK\n", 3);	
 			if (remote_skt_closed == false){
 				printf("\n");

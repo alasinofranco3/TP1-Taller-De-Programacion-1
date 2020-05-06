@@ -28,7 +28,6 @@ int parser_run(FILE* file, resizable_buffer_t * buf, char * remaining) {
 		status = resizable_buffer_save(buf, aux_buffer);
 		
 		if (status == ERROR) return ERROR;
-		//status = fseek(self->file, -(int)strlen(delim + 1), SEEK_CUR);
 		memset(remaining, 0, MAX_BUF_SIZE);
 		strncpy(remaining, delim + 1, strlen(delim + 1));
 	} else {

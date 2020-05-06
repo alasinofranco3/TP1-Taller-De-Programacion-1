@@ -125,11 +125,6 @@ int dbus_message_set(dbus_message_t *self, resizable_buffer_t *call, int id) {
 int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 	char aux [call->size];
 	strncpy(aux, call->buffer, call->size);
-	//char *delim = " ()";
-	//char *tk = strtok(aux, delim);
-	//char* ptr = strchr(aux, ' ');
-	//char dest[call->size], path[call->size], inter[call->size];
-	//char method[call->size], parameters[call->size];
 	char *read = aux;
 	char *delim = strchr(read,' ');
 	*delim = '\0';
@@ -139,7 +134,6 @@ int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 		return ERROR;
 	}
 
-	//tk = strtok(NULL, delim);
 	read = delim + 1;
 	delim = strchr(read, ' ');
 	*delim = '\0';
@@ -147,7 +141,7 @@ int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 		clean(self, call);
 		return ERROR;
 	}
-	//tk = strtok(NULL, delim);
+
 	read = delim + 1;
 	delim = strchr(read, ' ');
 	*delim = '\0';
@@ -155,7 +149,7 @@ int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 		clean(self, call);
 		return ERROR;
 	}
-	//tk = strtok(NULL, delim);
+
 	read = delim + 1;
 	delim = strchr(read, '(');
 	*delim = '\0';
@@ -163,7 +157,7 @@ int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 		clean(self, call);
 		return ERROR;
 	}
-	//tk = strtok(NULL, delim);
+
 	read = delim + 1;
 	delim = strchr(read, ')');
 	*delim = '\0';
@@ -180,9 +174,6 @@ int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 int dbus_message_body_set(dbus_message_t *self, resizable_buffer_t *call) {
 	char aux [call->size];
 	strncpy(aux, call->buffer, call->size);
-	//char* delim = "(,)";
-	//strtok(aux, delim);
-	//char* parameter = strtok(NULL, delim);
 	char* read = aux;
 	char* delim = strchr(read, '(');
 	read = delim + 1;

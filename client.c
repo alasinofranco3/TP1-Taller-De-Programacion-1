@@ -62,52 +62,6 @@ int dbus_client_send(dbus_client_t *self, resizable_buffer_t *buffer) {
 	return 0;
 }
 
-/*
-int dbus_client_get_call(dbus_client_t *self, resizable_buffer_t * buf, int s){
-	//HAGO ESTO PORQUE EL CPPLINT NO ME DEJA CREAR UN BUFFER CON TAMANIO S
-	//LA IDEA ERA RECIBIR POR PARAMETRO LO MAXIMO QUE PODIAMOS LEER CON 
-	//CADA FREAD
-	int buf_len = MAX_BUF_SIZE;
-	char aux_buffer[MAX_BUF_SIZE];
-	memset(aux_buffer, 0, buf_len);
-	char* ptr = NULL;
-	int status;
-	bool done = false;
-
-	while (!feof(self->file) && ptr == NULL) {
-		memset(aux_buffer, 0, buf_len);
-		if (fread(aux_buffer, 1, buf_len - 1, self->file) < buf_len - 1) {
-			done = true;
-		}
-		
-		aux_buffer[buf_len - 1] = '\0';
-		ptr = strchr(aux_buffer, '\n');
-		if (ptr == NULL) { //NO ENCONTRE EL FIN DE LINEA
-			 status = resizable_buffer_save(buf, aux_buffer);
-			 if (status == ERROR) {
-			 	dbus_client_destroy(self);
-			 	return ERROR;
-			 }
-		}
-	}	
-
-	if (ptr != NULL) {//ENCONTRE EL FIN DE LINEA
-		//COLOCO EL PUNTERO DEL ARCHIVO AL COMIENZO DE LA SIGUIENTE LINEA
-		if (done == false) {
-			fseek(self->file, -(sizeof(char) * (strlen(ptr) - 1)), SEEK_CUR);
-		}
-		//ptr = strtok(aux_buffer, "\n");
-		status = resizable_buffer_n_save(buf, aux_buffer, buf_len - strlen(ptr) - 1);
-		if (status == ERROR) {
-		 	dbus_client_destroy(self);
-		 	return ERROR;
-		}
-	}
-
-	return 0;
-}
-*/
-
 int dbus_client_get_call(dbus_client_t *self, resizable_buffer_t * b, char * r){
 	int status;
 	parser_t parser;
