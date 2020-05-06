@@ -62,16 +62,19 @@ int dbus_server_recv(dbus_server_t *self) {
 		status = dbus_server_recv_info(self, &summary);
 		if (status == ERROR) return ERROR;
 		if (status == 0) remote_skt_closed = true;
-		status = dbus_server_recv_header(self, &summary);
-		if (status == ERROR) return ERROR;
-		if (status == 0) remote_skt_closed = true;
-		status = dbus_server_recv_body(self, &summary);
-		if (status == ERROR) return ERROR;
-		if (status == 0) remote_skt_closed = true;
 		
-		server_send(&self->server, "OK\n", 3);	
-		if (remote_skt_closed == false){
-			printf("\n");
+		if (remote_skt_closed == false) {
+			status = dbus_server_recv_header(self, &summary);
+			if (status == ERROR) return ERROR;
+			if (status == 0) remote_skt_closed = true;
+			status = dbus_server_recv_body(self, &summary);
+			if (status == ERROR) return ERROR;
+			if (status == 0) remote_skt_closed = true;
+			
+			server_send(&self->server, "OK\n", 3);	
+			if (remote_skt_closed == false){
+				printf("\n");
+			}
 		}
 	}
 
@@ -151,7 +154,7 @@ int dbus_server_recv_body(dbus_server_t *self, struct call_sum *summary) {
 	char* buffer = malloc(sizeof(char) * summary->body_len);
 	int result = server_recv(&self->server, buffer, summary->body_len);
 	if (result == ERROR) return ERROR;
-	if (result != 0) {
+	if (result != 0 && strlen(buffer) != 0) {
 		printf("* Parametros: \n");
 
 		while (read < summary->body_len && result != 0) {

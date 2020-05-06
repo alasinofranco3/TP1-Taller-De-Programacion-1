@@ -123,40 +123,52 @@ int dbus_message_set(dbus_message_t *self, resizable_buffer_t *call, int id) {
 }
 
 int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
-	//char aux [call->size];
-	//strncpy(aux, call->buffer, call->size);
+	char aux [call->size];
+	strncpy(aux, call->buffer, call->size);
 	//char *delim = " ()";
 	//char *tk = strtok(aux, delim);
 	//char* ptr = strchr(aux, ' ');
-	char dest[call->size], path[call->size], inter[call->size];
-	char method[call->size], parameters[call->size];
-	sscanf(call->buffer, "%s %s %s %s(%s)", dest, path, inter, method, parameters);
-	char *ptr = strchr(method, '(');
-	*ptr = '\0';
+	//char dest[call->size], path[call->size], inter[call->size];
+	//char method[call->size], parameters[call->size];
+	char *read = aux;
+	char *delim = strchr(read,' ');
+	*delim = '\0';
 
-	if (dbus_message_header_add(self, dest, 6) == ERROR) {
+	if (dbus_message_header_add(self, read, 6) == ERROR) {
+		clean(self, call);
+		return ERROR;
+	}
+
+	//tk = strtok(NULL, delim);
+	read = delim + 1;
+	delim = strchr(read, ' ');
+	*delim = '\0';
+	if (dbus_message_header_add(self, read, 1) == ERROR) {
 		clean(self, call);
 		return ERROR;
 	}
 	//tk = strtok(NULL, delim);
-	//ptr = strchr(ptr + 1, ' ');
-	if (dbus_message_header_add(self, path, 1) == ERROR) {
+	read = delim + 1;
+	delim = strchr(read, ' ');
+	*delim = '\0';
+	if (dbus_message_header_add(self, read, 2) == ERROR) {
 		clean(self, call);
 		return ERROR;
 	}
 	//tk = strtok(NULL, delim);
-	if (dbus_message_header_add(self, inter, 2) == ERROR) {
+	read = delim + 1;
+	delim = strchr(read, '(');
+	*delim = '\0';
+	if (dbus_message_header_add(self, read, 3) == ERROR) {
 		clean(self, call);
 		return ERROR;
 	}
 	//tk = strtok(NULL, delim);
-	if (dbus_message_header_add(self, method, 3) == ERROR) {
-		clean(self, call);
-		return ERROR;
-	}
-	//tk = strtok(NULL, delim);
-	if (parameters != NULL) {
-		if (dbus_message_header_add_args(self, parameters) == ERROR) {
+	read = delim + 1;
+	delim = strchr(read, ')');
+	*delim = '\0';
+	if (read != NULL) {
+		if (dbus_message_header_add_args(self, read) == ERROR) {
 			clean(self, call);
 			return ERROR;
 		}
@@ -168,26 +180,38 @@ int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 int dbus_message_body_set(dbus_message_t *self, resizable_buffer_t *call) {
 	char aux [call->size];
 	strncpy(aux, call->buffer, call->size);
-	char* delim = "(,)";
-	strtok(aux, delim);
-	char* parameter = strtok(NULL, delim);
+	//char* delim = "(,)";
+	//strtok(aux, delim);
+	//char* parameter = strtok(NULL, delim);
+	char* read = aux;
+	char* delim = strchr(read, '(');
+	read = delim + 1;
+	delim = strchr(read, ')');
+	*delim = '\0';
 
-	while (parameter != NULL && strchr(parameter, '\n') == NULL) {	
+	while (read != NULL) {	
 		int *ptr; 
-		int buf_size = 5 + strlen(parameter);
+		delim = strchr(read, ',');
+		if (delim != NULL) *delim = '\0';
+		while (*read == ' ') read ++;
+		int buf_size = 5 + strlen(read);
 		char buf [buf_size];
 		ptr = (int*)(buf);
-		*ptr = set_little_endian(strlen(parameter));
-		for (int i = 0; i < strlen(parameter); i++) {
-			buf[sizeof(int) + i] = parameter[i];
+		*ptr = set_little_endian(strlen(read));
+		for (int i = 0; i < strlen(read); i++) {
+			buf[sizeof(int) + i] = read[i];
 		}
-		buf[sizeof(int) + strlen(parameter)] = '\0';
+		buf[sizeof(int) + strlen(read)] = '\0';
 		if (resizable_buffer_byte_save(&self->body, buf, buf_size) == ERROR) {
 			clean(self, call);
 			return ERROR;
 		}
 		
-		parameter = strtok(NULL, delim);		
+		if (delim == NULL) {
+			read = NULL;
+		}else {
+			read = delim + 1;
+		}
 	}
 
 	return 0;

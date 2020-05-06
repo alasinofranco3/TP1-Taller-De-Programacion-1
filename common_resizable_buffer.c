@@ -82,3 +82,11 @@ int resizable_buffer_byte_save(resizable_buffer_t *self, char* buf, int size) {
 
 	return 0;
 }
+
+bool resizable_buffer_is_empty(resizable_buffer_t *self) {
+	if (*self->buffer == '\0') {
+		return true;
+	} else {
+		return false;
+	}
+}

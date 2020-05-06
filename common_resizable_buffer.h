@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct resizable_buffer{
 	int size;
@@ -32,6 +33,8 @@ int resizable_buffer_n_save(resizable_buffer_t *self, char *word, int n);
 
 /*Se utiliza para guardar cadenas de bytes*/
 int resizable_buffer_byte_save(resizable_buffer_t *self, char* buf, int size);
+
+bool resizable_buffer_is_empty(resizable_buffer_t *self);
 
 #endif
 

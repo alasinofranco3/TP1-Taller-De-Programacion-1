@@ -1,9 +1,8 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#define MAX_BUF_SIZE 32
-
 #include "common_dbus_message.h"
+#include "common_parser.h"
 
 typedef struct dbus_client{
 	FILE* file;
@@ -15,12 +14,13 @@ int dbus_client_create(dbus_client_t *self, const char* file_name);
 void dbus_client_destroy(dbus_client_t *self);
 
 /*Esta funcion nos permite obtener una llamada del archivo del cliente.
-s determina el tamanio del buffer que vamos a usar para leer el archivo*/
-int dbus_client_get_call(dbus_client_t *self, resizable_buffer_t *buf, int s);
+la linea se guarda en el buffer b y en el vector r se almacena la parte
+de la linea que nos quedo sin procesar*/
+int dbus_client_get_call(dbus_client_t *self, resizable_buffer_t *b, char* r);
 
 /*intenta conectar al cliente al host h en el puerto p*/
 int dbus_client_connect(dbus_client_t *self, const char* h, const char* p);
-int dbus_client_send(dbus_client_t *self);
+int dbus_client_send(dbus_client_t *self, resizable_buffer_t *buffer);
 
 
 #endif
