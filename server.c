@@ -99,7 +99,7 @@ int dbus_server_recv_info(dbus_server_t *self, struct call_sum *summary) {
 			summary->header_size = bswap_32(summary->header_size);
 		}
 
-		printf("* Id: %#010x \n", id);
+		printf("* Id: %#010x\n", id);
 	}	
 
 	return result;
@@ -154,7 +154,7 @@ int dbus_server_recv_body(dbus_server_t *self, struct call_sum *summary) {
 	int result = server_recv(&self->server, buffer, summary->body_len);
 	if (result == ERROR) return ERROR;
 	if (result != 0 && strlen(buffer) != 0) {
-		printf("* Parametros: \n");
+		printf("* Parametros:\n");
 
 		while (read < summary->body_len && result != 0) {
 			int len = *(int *)&buffer[read];
