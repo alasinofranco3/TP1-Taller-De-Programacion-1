@@ -6,7 +6,7 @@
 #include "common_socket.h"
 
 //FUNCIONES PRIVADAS
-int error_in_getaddrinfo(int status, socket_t *skt) {
+static int error_in_getaddrinfo(int status, socket_t *skt) {
 	if (status != 0) { 
   		printf("Error in getaddrinfo: %s\n", gai_strerror(status));
       	socket_destroy(skt);
@@ -15,7 +15,7 @@ int error_in_getaddrinfo(int status, socket_t *skt) {
    	return 0;
 }
 
-void set_TCP_options(struct addrinfo *hints) {
+static void set_TCP_options(struct addrinfo *hints) {
 	memset(hints, 0, sizeof(struct addrinfo));
 	hints->ai_family = AF_INET;
 	hints->ai_socktype = SOCK_STREAM;

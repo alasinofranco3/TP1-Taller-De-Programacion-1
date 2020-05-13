@@ -29,7 +29,7 @@ int parser_run(FILE* file, resizable_buffer_t * buf, char * remaining) {
 		
 		if (status == ERROR) return ERROR;
 		memset(remaining, 0, MAX_BUF_SIZE);
-		strncpy(remaining, delim + 1, strlen(delim + 1));
+		strncpy(remaining, delim + 1, MAX_BUF_SIZE);
 	} else {
 		printf("Se encontro el fin de archivo\n");
 	}

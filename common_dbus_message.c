@@ -4,7 +4,7 @@
 
 //FUNCIONES PRIVADAS
 
-void set_first_4_bytes(char * buffer, int type) {
+static void set_first_4_bytes(char * buffer, int type) {
 	buffer[0] = type;
 	buffer[1] = 1;
 	
@@ -19,37 +19,49 @@ void set_first_4_bytes(char * buffer, int type) {
 	buffer[3] = 0;
 }
 
-int set_little_endian(int value) {
+static int set_little_endian(int value) {
 	value = htonl(value);
 	value = bswap_32(value);
 	return value;
 }
 
-void clean(dbus_message_t *self, resizable_buffer_t *call) {
+static void clean(dbus_message_t *self, resizable_buffer_t *call) {
 	resizable_buffer_destroy(call);
 	dbus_message_destroy(self);
 }
 
-int dbus_message_header_add(dbus_message_t *self, char* str, int par_type) {
+static int dbus_message_header_add(dbus_message_t *self, 
+	char* str, int par_type) {
 	int buf_size = 9 + strlen(str);
 	int padding = 8 - (buf_size % 8);
 	buf_size += padding;
 	
 	char buf [buf_size];
+	//COMPLETAMOS LOS PRIMEROS 4 BYTES DEL BUFFER CON EL FORMATO
+	//CORRESPONDIENTE
 	set_first_4_bytes(buf, par_type);
 
+	//AGREGAMOS EL TAMANIO DEL STRING AL BUFFER EN FORMATO
+	//LITTLE ENDIAN
 	int *ptr;
 	ptr = (int*)(buf + 4);
 	*ptr = set_little_endian(strlen(str));
 
+	//AGREGAMOS LOS CARACTERES DEL STRING,EN LA POSICION CORRECTA
+	//SABIENDO QUE ANTES TENEMOS 8 BYTES OCUPADOS POR EL TAMANIO DEL STRING
+	// Y EL FORMATO DEL PARAMETRO
 	for (int i = 0; i < strlen(str); i++) {
 		buf[4 + sizeof(int) + i] = str[i];
 	}
+	//PONEMOS EL \0 INDICANDO EL FIN DE STRING
 	buf[4 + sizeof(int) + strlen(str)] = '\0';
+	//AGREGRAMOS EL PADDING CORRESPONDIENTE AL FINAL DEL PARAMETRO
 	for (int i = 0; i < padding; i++) {
 		buf[5 + sizeof(int) + strlen(str) + i] = 0; 
 	}
 
+	//GUARDAMOS EL PARAMETRO CON EL FORMATO ADECUADO EN EL HEADER DEL 
+	//MENSAJE
  	int s = resizable_buffer_byte_save(&self->header, buf, buf_size);
 	if (s == ERROR) {
 		return ERROR;
@@ -58,8 +70,10 @@ int dbus_message_header_add(dbus_message_t *self, char* str, int par_type) {
 	return 0;
 }
 
-int dbus_message_header_add_args(dbus_message_t *self, char* args) {
+static int dbus_message_header_add_args(dbus_message_t *self, char* args) {
 	char* ptr;
+	//BUSCAMOS LA CANTIDAD DE ARGUMENTOS QUE TENDRA NUESTRA LLAMADA 
+	//SERAN LA CANTIDAD DE COMAS ENCONTRADAS +1
 	char args_num = 1;
 	ptr = strchr(args, ',');
 	while (ptr != NULL) {
@@ -68,15 +82,23 @@ int dbus_message_header_add_args(dbus_message_t *self, char* args) {
 	}
 	int buf_size = 6 + args_num;
 	char buf [buf_size];
+	//COMPLETAMOS LOS PRIMEROS 4 BYTES DEL BUFFER CON EL FORMATO
+	//CORRESPONDIENTE
 	set_first_4_bytes(buf, 9);
+	//AGREGAMOS EL BYTE QUE INDICA LA CANTIDAD DE PARAMETROS 
+	//AL BUFFER EN FORMATO LITTLE ENDIAN
 	args_num = set_little_endian(args_num);
 	buf [4] = args_num;
+	//AGREGAMOS UNA S POR CADA PARAMETRO PARA INDICAR EL TIPO DE CADA
+	//PARAMETRO,SABIENDO QUE ANTES TENEMOS 5 BYTES OCUPADOS, 1 PARA
+	//INDICAR LA CANTIDAD DE PARAMETROS Y OTROS 4 PARA EL FORMATO DE LA FIRMA
 	for (int i = 0; i < args_num; i++) {
 		buf[5 + i] = 's';
 	}
-	
+	//AGREGAMOS EL \0 CORRESPONDIENTE 
 	buf[buf_size - 1] = '\0';
-
+	//AGREGAMOS EL BUFFER CON EL CONTENIDO RELACIONADO A LA FIRMA DE LA LLAMADA
+	//AL HEADER DE NUESTRO MENSAJE
 	int s = resizable_buffer_byte_save(&self->header, buf, buf_size);
 	if (s == ERROR) {
 		return ERROR;

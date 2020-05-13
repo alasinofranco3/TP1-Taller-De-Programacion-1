@@ -2,7 +2,7 @@
 
 //FUNCIONES PRIVADAS
 
-int print_header_parameter(char endianness, char* ptr) {
+static int print_header_parameter(char endianness, char* ptr) {
 	int padding;
 	int len = *(int *)(ptr + 4);
 	if (endianness != 'l') {
@@ -17,7 +17,7 @@ int print_header_parameter(char endianness, char* ptr) {
 	return (9 + len + padding);
 }
 
-int call_sum_par_num_set(int*parameter_num, char* ptr) {
+static int call_sum_par_num_set(int*parameter_num, char* ptr) {
 	int par_num = (int)*(ptr + 4);
 	*parameter_num = par_num;
 	return (6 + par_num);
