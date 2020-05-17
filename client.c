@@ -29,7 +29,6 @@ int dbus_client_connect(dbus_client_t *self, const char* h, const char* p) {
 
    	status = socket_connect(&self->socket, h, p);
    	if (status == ERROR) {
-   		//dbus_client_destroy(self);
    		return 	ERROR;
    	}
 
@@ -42,8 +41,6 @@ int dbus_client_send(dbus_client_t *self, resizable_buffer_t *buffer) {
 		char server_answer [3];
 		dbus_message_t message;
 		if (dbus_message_create(&message)) {
-			//resizable_buffer_destroy(buffer);
-			//dbus_client_destroy(self);
 			return ERROR;
 		}	
 		if (dbus_message_set(&message, buffer, self->id_counter) == ERROR) {
@@ -52,7 +49,6 @@ int dbus_client_send(dbus_client_t *self, resizable_buffer_t *buffer) {
 		}
 		if (dbus_message_send(&message, &self->socket) == ERROR) {
 			dbus_message_destroy(&message);
-			//dbus_client_destroy(self);
 			return ERROR;
 		}
 		if (socket_recv(&self->socket, server_answer, 3) == ERROR) {
@@ -62,9 +58,6 @@ int dbus_client_send(dbus_client_t *self, resizable_buffer_t *buffer) {
 		printf("%#010x: %s", self->id_counter, server_answer);
 		dbus_message_destroy(&message);
 	}
-	/*else{
-		resizable_buffer_destroy(buffer);
-	}*/
 
 	return 0;
 }
@@ -72,7 +65,7 @@ int dbus_client_send(dbus_client_t *self, resizable_buffer_t *buffer) {
 int dbus_client_get_call(dbus_client_t *self, resizable_buffer_t * b, char * r){
 	int status;
 	parser_t parser;	
-	
+
 	status = resizable_buffer_save(b, r);
 	if (status == ERROR) {
 	 	return ERROR;

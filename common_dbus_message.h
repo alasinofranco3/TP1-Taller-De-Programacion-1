@@ -28,7 +28,6 @@ int dbus_message_body_set(dbus_message_t *self, resizable_buffer_t *call);
 //Funcion interna de dbus_message_set
 void dbus_message_info_set(dbus_message_t *self, int id_counter);
 
-//Al finalizar,se destruye el dbus_message
 int dbus_message_send(dbus_message_t *self, socket_t *socket);
 
 

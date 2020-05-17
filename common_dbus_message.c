@@ -24,12 +24,7 @@ static int set_little_endian(int value) {
 	value = bswap_32(value);
 	return value;
 }
-/*
-static void clean(dbus_message_t *self, resizable_buffer_t *call) {
-	resizable_buffer_destroy(call);
-	dbus_message_destroy(self);
-}
-*/
+
 static int dbus_message_header_add(dbus_message_t *self, 
 	char* str, int par_type) {
 	int buf_size = 9 + strlen(str);
@@ -139,8 +134,6 @@ int dbus_message_set(dbus_message_t *self, resizable_buffer_t *call, int id) {
 
 	dbus_message_info_set(self, id);
 
-	//resizable_buffer_destroy(call);
-
 	return 0;
 }
 
@@ -155,7 +148,6 @@ int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 	*delim = '\0';
 
 	if (dbus_message_header_add(self, read, 6) == ERROR) {
-		//clean(self, call);
 		return ERROR;
 	}
 
@@ -163,7 +155,6 @@ int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 	delim = strchr(read, ' ');
 	*delim = '\0';
 	if (dbus_message_header_add(self, read, 1) == ERROR) {
-		//clean(self, call);
 		return ERROR;
 	}
 
@@ -171,7 +162,6 @@ int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 	delim = strchr(read, ' ');
 	*delim = '\0';
 	if (dbus_message_header_add(self, read, 2) == ERROR) {
-		//clean(self, call);
 		return ERROR;
 	}
 
@@ -179,7 +169,6 @@ int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 	delim = strchr(read, '(');
 	*delim = '\0';
 	if (dbus_message_header_add(self, read, 3) == ERROR) {
-		//clean(self, call);
 		return ERROR;
 	}
 
@@ -188,7 +177,6 @@ int dbus_message_header_set(dbus_message_t *self, resizable_buffer_t *call) {
 	*delim = '\0';
 	if (read != NULL) {
 		if (dbus_message_header_add_args(self, read) == ERROR) {
-			//clean(self, call);
 			return ERROR;
 		}
 	}	
@@ -218,7 +206,6 @@ int dbus_message_body_set(dbus_message_t *self, resizable_buffer_t *call) {
 		}
 		buf[sizeof(int) + strlen(read)] = '\0';
 		if (resizable_buffer_byte_save(&self->body, buf, buf_size) == ERROR) {
-			//clean(self, call);
 			return ERROR;
 		}
 		
@@ -252,23 +239,20 @@ int dbus_message_send(dbus_message_t *self, socket_t *socket) {
 	
 	status = socket_send(socket, self->info, 16);
 	if (status == ERROR) {
-		//dbus_message_destroy(self);
 		return ERROR;
 	}
 
 	status = socket_send(socket, self->header.buffer, self->header.size);
 	if (status == ERROR) {
-		//dbus_message_destroy(self);
 		return ERROR;
 	}
 
 	status = socket_send(socket, self->body.buffer, self->body.size);
 	if (status == ERROR) {
-		//dbus_message_destroy(self);
 		return ERROR;
 	}
 
-	//dbus_message_destroy(self);
+
 
 	return 0;
 }
