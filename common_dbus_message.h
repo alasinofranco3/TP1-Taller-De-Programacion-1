@@ -2,7 +2,7 @@
 #define COMMON_DBUS_MESSAGE_H 
 
 #include "common_resizable_buffer.h"
-#include "common_client.h"
+#include "common_socket.h"
 
 #define INFO_SIZE 16
 
@@ -29,7 +29,7 @@ int dbus_message_body_set(dbus_message_t *self, resizable_buffer_t *call);
 void dbus_message_info_set(dbus_message_t *self, int id_counter);
 
 //Al finalizar,se destruye el dbus_message
-int dbus_message_send(dbus_message_t *self, client_t *client);
+int dbus_message_send(dbus_message_t *self, socket_t *socket);
 
 
 

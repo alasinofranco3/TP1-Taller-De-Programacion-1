@@ -26,22 +26,22 @@ static int call_sum_par_num_set(int*parameter_num, char* ptr) {
 //FUNCIONES PUBLICAS 
 
 int dbus_server_create(dbus_server_t *self) {
-	int status;
-	status = server_create(&self->server);
-	if (status == ERROR) return ERROR;
-	return 0; 
+	int status = socket_create(&self->skt_acep);
+	return status;
 }
 
 void dbus_server_destroy(dbus_server_t *self) {
-	server_destroy(&self->server);
+	socket_shut_down(&self->peer_skt);
+	socket_destroy(&self->peer_skt);
+	socket_shut_down(&self->skt_acep);
+	socket_destroy(&self->skt_acep);
 }
 
 int dbus_server_bind_and_listen(dbus_server_t *self, const char* port) {
 	int status;
-	status = server_bind_and_listen(&self->server, port, 1);
+	status = socket_bind_and_listen(&self->skt_acep, port, 1);
 	
 	if (status == ERROR) {
-		dbus_server_destroy(self);
 		return ERROR;
 	}
 
@@ -50,8 +50,8 @@ int dbus_server_bind_and_listen(dbus_server_t *self, const char* port) {
 
 int dbus_server_accept(dbus_server_t *self) {
 	int result;
-	result = server_accept(&self->server);
-	return result;
+	result = socket_accept(&self->skt_acep, &self->peer_skt);
+	return result;	
 }
 
 int dbus_server_recv(dbus_server_t *self) {
@@ -70,7 +70,7 @@ int dbus_server_recv(dbus_server_t *self) {
 			status = dbus_server_recv_body(self, &summary);
 			if (status == ERROR) return ERROR;
 			if (status == 0) remote_skt_closed = true;			
-			server_send(&self->server, "OK\n", 3);	
+			socket_send(&self->peer_skt, "OK\n", 3);	
 			if (remote_skt_closed == false){
 				printf("\n");
 			}
@@ -84,7 +84,7 @@ int dbus_server_recv_info(dbus_server_t *self, struct call_sum *summary) {
 	int result;
 	int id;
 	char buffer [16];
-	result = server_recv(&self->server, buffer, 16);
+	result = socket_recv(&self->peer_skt, buffer, 16);
 	if (result == ERROR) return ERROR;
 
 	if (result != 0) {
@@ -107,7 +107,7 @@ int dbus_server_recv_info(dbus_server_t *self, struct call_sum *summary) {
 
 int dbus_server_recv_header(dbus_server_t *self, struct call_sum *summary) {
 	char* buffer = malloc(sizeof(char) * summary->header_size);
-	int result = server_recv(&self->server, buffer, summary->header_size);
+	int result = socket_recv(&self->peer_skt, buffer, summary->header_size);
 	if (result == ERROR) return ERROR;
 	char* ptr = buffer;
 	int read = 0;
@@ -151,7 +151,7 @@ int dbus_server_recv_body(dbus_server_t *self, struct call_sum *summary) {
 		return 0;
 	}
 	char* buffer = malloc(sizeof(char) * summary->body_len);
-	int result = server_recv(&self->server, buffer, summary->body_len);
+	int result = socket_recv(&self->peer_skt, buffer, summary->body_len);
 	if (result == ERROR) return ERROR;
 	if (result != 0 && strlen(buffer) != 0) {
 		printf("* Parametros:\n");

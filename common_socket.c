@@ -9,7 +9,6 @@
 static int error_in_getaddrinfo(int status, socket_t *skt) {
 	if (status != 0) { 
   		printf("Error in getaddrinfo: %s\n", gai_strerror(status));
-      	socket_destroy(skt);
       	return ERROR;
    	}
    	return 0;
@@ -49,6 +48,12 @@ int socket_bind_and_listen(socket_t *self, const char* port, int size) {
 	struct addrinfo hints;
 	bool success = false;
 
+	//RESETEAMOS EL SOCKET POR SI ESTUVIESE EN TIME WAIT
+	status = socket_reset(self);
+	if (status == ERROR) {
+		return ERROR;
+	}
+
 	set_TCP_options(&hints);
 	
 	status = getaddrinfo(NULL, port, &hints, &results);
@@ -66,7 +71,6 @@ int socket_bind_and_listen(socket_t *self, const char* port, int size) {
 	
 	if (success == false) {
 		printf("Binding and listening failed,no valid adrresses remaining\n");
-		socket_destroy(self);
 		return ERROR;
 	}
 
@@ -97,7 +101,6 @@ int socket_connect(socket_t *self, const char* h, const char* p) {
 	freeaddrinfo(results);
 
 	if (connected == false) {
-		socket_destroy(self);
 		return ERROR;
 	}
 
@@ -109,8 +112,6 @@ int socket_accept(socket_t *self, socket_t *peerskt) {
 	
 	if (peerskt->skt == -1) {
 		printf("Error in accept: %s\n", strerror(errno));
-		socket_destroy(self);
-		socket_destroy(peerskt);
 		return ERROR;
 	}
 
@@ -123,7 +124,6 @@ int socket_reset(socket_t *self) {
 	status = setsockopt(self->skt, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
     if (status == -1) {
 		printf("Error in reset: %s\n", strerror(errno));
-		socket_destroy(self);
     	return ERROR;
     }
   
@@ -146,8 +146,6 @@ int socket_send(socket_t *self, char *message, int len) {
 			remote_skt_closed = true;
 		} else if (result == -1) {
 			printf("Error in send: %s\n", strerror(errno));
-			socket_shut_down(self);
-			socket_destroy(self);
 			return ERROR;
 		} else {
 			sent += result;
@@ -168,8 +166,6 @@ int socket_recv(socket_t *self, char *buffer, int size) {
 		
 		if (result == -1) {
 			printf("Error in recv: %s\n", strerror(errno));
-			socket_shut_down(self);
-			socket_destroy(self);
 			return ERROR;
 		} else if (result == 0) { //SI received VALE CERO NOS CERRARON EL SKT
 			skt_closed = true;

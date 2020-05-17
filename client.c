@@ -13,23 +13,23 @@ int dbus_client_create(dbus_client_t *self, const char* file_name) {
 
 	if (!self->file) return ERROR;
 
-	status = client_create(&self->client);
+	status = socket_create(&self->socket);
 	if (status == ERROR) return ERROR;
 
 	return 0;
 }
 
 void dbus_client_destroy(dbus_client_t *self) {
-	client_destroy(&self->client);
+	socket_destroy(&self->socket);
 	fclose(self->file);
 }
 
 int dbus_client_connect(dbus_client_t *self, const char* h, const char* p) {
 	int status;
 
-   	status = client_connect(&self->client, h, p);
+   	status = socket_connect(&self->socket, h, p);
    	if (status == ERROR) {
-   		dbus_client_destroy(self);
+   		//dbus_client_destroy(self);
    		return 	ERROR;
    	}
 
@@ -42,42 +42,45 @@ int dbus_client_send(dbus_client_t *self, resizable_buffer_t *buffer) {
 		char server_answer [3];
 		dbus_message_t message;
 		if (dbus_message_create(&message)) {
-			resizable_buffer_destroy(buffer);
-			dbus_client_destroy(self);
+			//resizable_buffer_destroy(buffer);
+			//dbus_client_destroy(self);
 			return ERROR;
 		}	
 		if (dbus_message_set(&message, buffer, self->id_counter) == ERROR) {
+			dbus_message_destroy(&message);
 			return ERROR;
 		}
-		if (dbus_message_send(&message, &self->client) == ERROR) {
-			dbus_client_destroy(self);
+		if (dbus_message_send(&message, &self->socket) == ERROR) {
+			dbus_message_destroy(&message);
+			//dbus_client_destroy(self);
 			return ERROR;
 		}
-		if (client_recv(&self->client, server_answer, 3) == ERROR) return ERROR;
+		if (socket_recv(&self->socket, server_answer, 3) == ERROR) {
+			dbus_message_destroy(&message);
+			return ERROR;
+		}	
 		printf("%#010x: %s", self->id_counter, server_answer);
-	}else{
-		resizable_buffer_destroy(buffer);
+		dbus_message_destroy(&message);
 	}
+	/*else{
+		resizable_buffer_destroy(buffer);
+	}*/
+
 	return 0;
 }
 
 int dbus_client_get_call(dbus_client_t *self, resizable_buffer_t * b, char * r){
 	int status;
 	parser_t parser;	
-	if (resizable_buffer_create(b, 1)) {
-		dbus_client_destroy(self);
-		return ERROR;
-	}	
+	
 	status = resizable_buffer_save(b, r);
 	if (status == ERROR) {
-	 	dbus_client_destroy(self);
 	 	return ERROR;
 	}
 	parser_create(&parser);
 	status = parser_run(self->file, b, r);
 	if (status == ERROR) {
 		parser_destroy(&parser);
-		dbus_client_destroy(self);
 		return ERROR;
 	}
 	parser_destroy(&parser);

@@ -28,7 +28,7 @@ int resizable_buffer_resize(resizable_buffer_t *self, int new_size){
 	char *result;
 	result = realloc(self->buffer, new_size);
 	if (result == NULL) {
-		resizable_buffer_destroy(self);
+		//resizable_buffer_destroy(self);
 		return ERROR;		
 	} 
 	self->buffer = result;
@@ -53,7 +53,7 @@ int resizable_buffer_n_save(resizable_buffer_t *self, char *word, int n){
 
 	ptr_status = strncat(self->buffer, word, n);
 	if (ptr_status == NULL) {
-		resizable_buffer_destroy(self);
+		//resizable_buffer_destroy(self);
 		return ERROR;
 	} 
 

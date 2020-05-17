@@ -1,12 +1,13 @@
 #ifndef SERVER_H
 #define SERVER_H 
 
-#include "common_server.h"
+#include "common_socket.h"
 #include <byteswap.h>
 #include <stdlib.h>
 
 typedef struct dbus_server {
-	server_t server;
+	socket_t skt_acep;
+	socket_t peer_skt;
 }dbus_server_t;
 
 struct call_sum {

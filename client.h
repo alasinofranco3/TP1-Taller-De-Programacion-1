@@ -7,7 +7,8 @@
 typedef struct dbus_client{
 	FILE* file;
 	int id_counter;
-	client_t client;
+	//client_t client;
+	socket_t socket;
 }dbus_client_t;
 
 int dbus_client_create(dbus_client_t *self, const char* file_name);
